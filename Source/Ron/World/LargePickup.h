@@ -14,5 +14,23 @@ class RON_API ALargePickup : public AWorldPickup
 public:
 
 	ALargePickup();
+
+	virtual void Interact() override;
+	void Drag(float X, float Y);
+
+protected:
+
+	virtual void Tick(float DeltaSeconds) override;
+
+private:
+
+	bool FindFloor();
+	void MoveToFloor();
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
+	bool ShowDebugLine;
+
+	FHitResult Hit;
+	float Floor;
 	
 };

@@ -16,20 +16,23 @@ public:
 	AWorldPickup();
 
 	UStaticMeshComponent* GetMeshStaticMesh() { return StaticMesh; }
+	bool IsLargePickup() { return IsLarge; }
 
 	virtual void Interact() override;
 
-	virtual void Tick(float DeltaSeconds) override;
-
 protected:
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* StaticMesh;
 
-private:
-
 	UPROPERTY(VisibleAnywhere)
 	bool IsBeingHeld;
+
+	UPROPERTY()
+	bool IsLarge;
+private:
+
 
 };

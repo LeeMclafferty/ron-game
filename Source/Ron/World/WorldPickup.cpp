@@ -20,6 +20,7 @@ AWorldPickup::AWorldPickup()
 	StaticMesh->SetSimulatePhysics(true);
 	
 	IsBeingHeld = false;
+	IsLarge = false;
 }
 
 void AWorldPickup::BeginPlay()

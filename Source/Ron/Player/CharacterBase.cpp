@@ -11,19 +11,15 @@
 #include "Ron/Items/ItemData.h"
 #include "Ron/Framework/KitchenGameMode.h"
 #include "Ron/Player/RonController.h"
+#include "Ron/World/LargePickup.h"
 
 ACharacterBase::ACharacterBase()
+:ShowDebugPoint(false), ReachRange(100.f), ReachMin(50.f), ReachMax(100.f), HasItemHeld(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	HoldLocation = CreateDefaultSubobject<USceneComponent>(TEXT("Item Hold Location"));
 	HoldLocation->SetupAttachment(RootComponent);
-
-	ReachRange = 100.f;
-	ReachMin = 50.f;
-	ReachMax = 100.f;
-	ShowDebugPoint = false;
-	HasItemHeld = false;
 }
 
 void ACharacterBase::BeginPlay()
@@ -104,6 +100,10 @@ void ACharacterBase::Interact()
 	{
 		LookedAtActor->Interact();
 	}
+	else if (HeldActor)
+	{
+		HeldActor->Interact();
+	}
 }
 
 void ACharacterBase::DecreaseReach()
@@ -144,7 +144,14 @@ void ACharacterBase::Tick(float DeltaTime)
 	
 	if (HeldActor && HasItemHeld)
 	{	
-		UpdateHeldActorLoction();
+		if (!HeldActor->IsLargePickup())
+		{
+			UpdateHeldActorLoction();
+		}
+		else
+		{
+			DragHeldActor();
+		}
 	}
 	else
 	{
@@ -168,9 +175,34 @@ void ACharacterBase::UpdateHeldActorLoction()
 	}
 }
 
+void ACharacterBase::DragHeldActor()
+{
+	if (!HeldActor)
+	{
+		return;
+	}
+	else if(ALargePickup* Large= Cast<ALargePickup>(HeldActor))
+	{
+		if (AController* PlayerController = GetController())
+		{
+			FVector Loc;
+			FRotator Rot;
+			PlayerController->GetPlayerViewPoint(Loc, Rot);
+			if (HeldActor) 
+			{
+				ReachRange = 150.f;
+				UE_LOG(LogTemp, Warning, TEXT("Large"));
+				Large->Drag((Loc.X + Rot.Vector().X), Loc.Y + Rot.Vector().Y);
+			}
+			//GEngine->AddOnScreenDebugMessage(-1, .5, FColor::Purple, FString::Printf(TEXT("Held Actor: %s"), *HeldActor->GetName()));
+		}
+	}
+
+}
+
 void ACharacterBase::OpenPauseMenu()
 {
-		UE_LOG(LogTemp, Warning, TEXT("open"))
+	//UE_LOG(LogTemp, Warning, TEXT("open"))
 	if (KitchenGameMode && RonController)
 	{
 		RonController->PauseGame();

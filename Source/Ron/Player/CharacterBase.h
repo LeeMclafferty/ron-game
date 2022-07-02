@@ -27,6 +27,7 @@ public:
 	void SetActorBeingLooted(class ALootable* Lootable) { ActorBeingLooted = Lootable; }
 
 	FVector GetHoldLocation() { return HoldLocation->GetComponentLocation(); }
+
 	UFUNCTION(BlueprintCallable)
 	class ALootable* GetActorBeingLooted() { return ActorBeingLooted; }
 
@@ -73,6 +74,8 @@ private:
 	void IncreaseReach();
 	UFUNCTION()
 	void UpdateHeldActorLoction();
+	UFUNCTION()
+	void DragHeldActor();
 
 	UFUNCTION()
 	void OpenPauseMenu();
