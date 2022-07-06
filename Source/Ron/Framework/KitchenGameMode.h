@@ -42,7 +42,11 @@ protected:
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 
+	void StartSounds();
+
 private:
+	class URonGameInstance* GI;
+	void SetGamInstance();
 	bool HasFinalKey;
 
 	// Have to spawn on begin play to have a C++ ref

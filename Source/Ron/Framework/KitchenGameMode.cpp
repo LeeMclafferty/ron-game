@@ -3,15 +3,17 @@
 
 #include "Ron/Framework/KitchenGameMode.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 
 #include "Ron/World/CookingPot.h"
 #include "Ron/World/Key.h"
 #include "Ron/World/Door.h"
 #include "Ron/Widgets/GameplayWidget.h"
+#include "Ron/Framework/RonGameInstance.h"
 
 AKitchenGameMode::AKitchenGameMode()
-:IsOnQuestOne(false), IsOnQuestTwo(false), IsOnQuestThree(false), HasFoundRecipe(false), CurrentWidget(nullptr), HasFinalKey(false)
+:IsOnQuestOne(false), IsOnQuestTwo(false), IsOnQuestThree(false), HasFoundRecipe(false), CurrentWidget(nullptr), GI(nullptr), HasFinalKey(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -19,12 +21,14 @@ AKitchenGameMode::AKitchenGameMode()
 void AKitchenGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
+	SetGamInstance();
 	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), StartingWidgetClass);
-	//ChangeMenuWidget(StartingWidgetClass);
+	ChangeMenuWidget(StartingWidgetClass);
 	SetupKitchQuestsText();
 	SpawnActorsOnBeginPlay();
 	IsOnQuestOne = true;
+	StartSounds();
+	
 
 	if (FinalKey)
 	{
@@ -57,6 +61,22 @@ FString AKitchenGameMode::GetKitchenQuest(int index)
 	return KitchenQuestsText[index];
 }
 
+void AKitchenGameMode::StartSounds()
+{
+	if (GI)
+	{
+		GI->PlaySound();
+	}
+}
+
+void AKitchenGameMode::SetGamInstance()
+{
+	if (URonGameInstance* Inst = Cast<URonGameInstance>(UGameplayStatics::GetGameInstance(GetWorld())))
+	{
+		GI = Inst;
+	}
+}
+
 void AKitchenGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -72,7 +92,7 @@ void AKitchenGameMode::Tick(float DeltaSeconds)
 	if (UGameplayWidget* GameplayWidget = Cast<UGameplayWidget>(CurrentWidget))
 	{
 		GameplayWidget->ChooseQuest();
-		//GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Purple, FString::Printf(TEXT("HasRecipe: %i"), CheckForAllIngredients()));
+		//GEngine->AddOnScreenDebuGIessage(-1, 2, FColor::Purple, FString::Printf(TEXT("HasRecipe: %i"), CheckForAllIngredients()));
 	}
 }
 
