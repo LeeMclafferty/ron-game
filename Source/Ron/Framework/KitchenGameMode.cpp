@@ -8,20 +8,23 @@
 #include "Ron/World/CookingPot.h"
 #include "Ron/World/Key.h"
 #include "Ron/World/Door.h"
+#include "Ron/Widgets/GameplayWidget.h"
 
 AKitchenGameMode::AKitchenGameMode()
+:IsOnQuestOne(false), IsOnQuestTwo(false), IsOnQuestThree(false), HasFoundRecipe(false), CurrentWidget(nullptr), HasFinalKey(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
-	HasFinalKey = false;
 }
 
 void AKitchenGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ChangeMenuWidget(StartingWidgetClass);
-
+	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), StartingWidgetClass);
+	//ChangeMenuWidget(StartingWidgetClass);
+	SetupKitchQuestsText();
 	SpawnActorsOnBeginPlay();
+	IsOnQuestOne = true;
 
 	if (FinalKey)
 	{
@@ -49,6 +52,11 @@ void AKitchenGameMode::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass)
 	}
 }
 
+FString AKitchenGameMode::GetKitchenQuest(int index)
+{
+	return KitchenQuestsText[index];
+}
+
 void AKitchenGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -59,6 +67,12 @@ void AKitchenGameMode::Tick(float DeltaSeconds)
 			HasFinalKey = true;
 			RevealKey();
 		}
+	}
+	CheckQuestIndex();
+	if (UGameplayWidget* GameplayWidget = Cast<UGameplayWidget>(CurrentWidget))
+	{
+		GameplayWidget->ChooseQuest();
+		//GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Purple, FString::Printf(TEXT("HasRecipe: %i"), CheckForAllIngredients()));
 	}
 }
 
@@ -129,6 +143,39 @@ void AKitchenGameMode::SetExitDoorKey()
 	{
 		ExitDoor->LockDoor();
 		ExitDoor->SetUnlockKey(FinalKey);
+	}
+}
+
+void AKitchenGameMode::SetupKitchQuestsText()
+{
+	FString QuestOne("Find mom's secret recipe!");
+	FString QuestTwo("Put all of the ingredients into the tall pot.");
+	FString QuestThree("Use the key to get to a safe place!");
+
+	KitchenQuestsText.Emplace(QuestOne);
+	KitchenQuestsText.Emplace(QuestTwo);
+	KitchenQuestsText.Emplace(QuestThree);
+}
+
+void AKitchenGameMode::CheckQuestIndex()
+{
+	if (!HasFoundRecipe)
+	{
+		IsOnQuestOne = true;
+		IsOnQuestTwo = false;
+		IsOnQuestThree = false;
+	}
+	if (HasFoundRecipe && !CheckForAllIngredients())
+	{
+		IsOnQuestOne = false;
+		IsOnQuestTwo = true;
+		IsOnQuestThree = false;
+	}
+	if (HasFoundRecipe && CheckForAllIngredients() && HasFinalKey)
+	{
+		IsOnQuestOne = false;
+		IsOnQuestTwo = false;
+		IsOnQuestThree = true;
 	}
 }
 

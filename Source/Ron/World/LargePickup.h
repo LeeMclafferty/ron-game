@@ -21,6 +21,7 @@ public:
 protected:
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void BeginPlay() override;
 
 private:
 
@@ -32,5 +33,19 @@ private:
 
 	FHitResult Hit;
 	float Floor;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
+	float DragHeight;
+
+	void OnDragStart();
+	void OnDragStop();
+	class ACharacterBase* Player;
+	class APlayerController* PC;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
+	float InterpSpeed;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
+	float SpeedWhileDragging;
 	
 };

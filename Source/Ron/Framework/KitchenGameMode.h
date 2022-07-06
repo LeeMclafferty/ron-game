@@ -26,6 +26,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UMG Game")
 	void ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass);
 
+	UFUNCTION(BlueprintCallable, Category = "UMG Game")
+	FString GetKitchenQuest(int index);
+
+	bool IsOnQuestOne;
+	bool IsOnQuestTwo;
+	bool IsOnQuestThree;
+
+	bool HasFoundRecipe;
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG Game")
@@ -58,4 +66,9 @@ private:
 	class ADoor* ExitDoor;
 
 	void SetExitDoorKey();
+
+	TArray<FString> KitchenQuestsText;
+	void SetupKitchQuestsText();
+
+	void CheckQuestIndex();
 };

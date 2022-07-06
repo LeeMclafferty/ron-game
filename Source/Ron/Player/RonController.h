@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Blueprint/UserWidget.h"
 #include "RonController.generated.h"
 
 /**
@@ -30,9 +31,10 @@ protected:
 
 	//Widgets to switch between
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UUserWidget> PauseMenuClass;
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UUserWidget> PlayerHud;
+	TSubclassOf<UUserWidget> PlayerHudClass;
 
 private:
 

@@ -191,8 +191,9 @@ void ACharacterBase::DragHeldActor()
 			if (HeldActor) 
 			{
 				ReachRange = 150.f;
-				UE_LOG(LogTemp, Warning, TEXT("Large"));
-				Large->Drag((Loc.X + Rot.Vector().X), Loc.Y + Rot.Vector().Y);
+				Large->Drag(Loc.X + Rot.Vector().X * ReachRange, Loc.Y + Rot.Vector().Y * ReachRange);
+				//Large->SetActorLocation(FVector(Loc.X + Rot.Vector().X * ReachRange, Loc.Y + Rot.Vector().Y * ReachRange, 191.f));
+				Large->SetActorRotation(HoldLocation->GetComponentRotation());
 			}
 			//GEngine->AddOnScreenDebugMessage(-1, .5, FColor::Purple, FString::Printf(TEXT("Held Actor: %s"), *HeldActor->GetName()));
 		}

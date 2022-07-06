@@ -13,7 +13,7 @@ ARonController::ARonController()
 
 void ARonController::BeginPlay()
 {
-
+	GetKitchenGamemode();
 }
 
 void ARonController::GetKitchenGamemode()
@@ -44,7 +44,8 @@ void ARonController::PauseGame()
 	EnableUIInput();
 	IsGamePaused = true;
 	UGameplayStatics::SetGamePaused(GetWorld(), IsGamePaused);
-	KitchenGameMode->ChangeMenuWidget(PauseMenuClass);
+	if(PauseMenuClass)
+		KitchenGameMode->ChangeMenuWidget(PauseMenuClass);
 }
 
 void ARonController::ResumeGame()
@@ -52,5 +53,6 @@ void ARonController::ResumeGame()
 	EnableGameplayInput();
 	IsGamePaused = false;
 	UGameplayStatics::SetGamePaused(GetWorld(), IsGamePaused);
-	KitchenGameMode->ChangeMenuWidget(PlayerHud);
+	if(PlayerHudClass)
+		KitchenGameMode->ChangeMenuWidget(PlayerHudClass);
 }

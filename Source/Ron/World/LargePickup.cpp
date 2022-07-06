@@ -3,33 +3,51 @@
 
 #include "Ron/World/LargePickup.h"
 #include "Components/StaticMeshComponent.h"
-#include <Runtime/Core/Public/ProfilingDebugging/CookStats.h>
+#include "Kismet/GameplayStatics.h"
+#include "Math/UnrealMathUtility.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
+#include "Ron/Player/CharacterBase.h"
 
 ALargePickup::ALargePickup()
-:ShowDebugLine(false), Floor(0.f)
+:ShowDebugLine(false), Floor(0.f), DragHeight(20.2), Player(nullptr), InterpSpeed(5.f), SpeedWhileDragging(85.f)
 {
 	//StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	StaticMesh->SetMassOverrideInKg(NAME_None, 9999.f, true);
+	StaticMesh->SetLinearDamping(10.f);
+	StaticMesh->SetAngularDamping(10.f);
+	
 	
 	IsLarge = true;
 }
 
 void ALargePickup::Interact()
 {
-	Super::Interact();
-
+	//Super::Interact();
 	if (!IsBeingHeld)
 	{
-		StaticMesh->SetSimulatePhysics(true);
-		//StaticMesh->SetCollisionProfileName("IgnoreOnlyPawn");
+		OnDragStart();
 	}
+	else
+	{
+		OnDragStop();
+	}
+
 }
 
 void ALargePickup::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
+	Super::Tick(DeltaSeconds);;
 	FindFloor();
 	MoveToFloor();
+}
+
+void ALargePickup::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	Player = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
 
 bool ALargePickup::FindFloor()
@@ -47,7 +65,7 @@ bool ALargePickup::FindFloor()
 		DrawDebugLine(GetWorld(), StartLocation, EndLocation , FColor::Red, false, -1.f, 0);
 	}
 
-	return GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_Visibility, Params);
+	return GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECC_GameTraceChannel2, Params);
 
 }
 
@@ -58,12 +76,39 @@ void ALargePickup::MoveToFloor()
 		return;
 	}
 	AActor* HitActor = Hit.GetActor();
-	Floor = Hit.ImpactPoint.Z + 20; //float right above the floor so there is no collision issues.
-	FVector NewLocation(GetActorLocation().X, GetActorLocation().Y, Floor);
+	Floor = Hit.ImpactPoint.Z + DragHeight; //float right above the floor so there is no collision issues.
 	//SetActorLocation(NewLocation);
 }
 
+
 void ALargePickup::Drag(float X, float Y)
 {
-	SetActorLocation(FVector(X, Y, Floor));
+	FVector CurrentLocation(GetActorLocation());
+	FVector TargetLocation(X, Y, Floor);
+	FVector Interp = FMath::VInterpTo(CurrentLocation, TargetLocation, GetWorld()->GetDeltaSeconds(), InterpSpeed);
+	SetActorLocation(Interp, true);
+}
+
+void ALargePickup::OnDragStart()
+{
+	if (!Player || !PC)
+		return;
+	Player->SetHoldingItem(true);
+	Player->SetHeldActor(this);
+	Player->GetCharacterMovement()->MaxWalkSpeed = SpeedWhileDragging;
+	PC->PlayerInput->SetMouseSensitivity(.02);
+	IsBeingHeld = true;
+	StaticMesh->CanCharacterStepUpOn = ECB_No;
+}
+
+void ALargePickup::OnDragStop()
+{
+	if (!Player || !PC)
+		return;
+	Player->SetHoldingItem(false);
+	Player->SetHeldActor(nullptr);
+	Player->GetCharacterMovement()->MaxWalkSpeed = 175;
+	PC->PlayerInput->SetMouseSensitivity(.07);
+	IsBeingHeld = false;
+	StaticMesh->CanCharacterStepUpOn = ECB_Yes;
 }
