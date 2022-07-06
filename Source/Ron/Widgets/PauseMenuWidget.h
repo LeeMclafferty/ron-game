@@ -17,11 +17,20 @@ class RON_API UPauseMenuWidget : public UUserWidget
 public:
 	bool Initialize() override;
 
+protected:
 	UFUNCTION(BlueprintCallable)
 	void OnPressResume();
 
-protected:
+	UFUNCTION(BlueprintCallable)
+	void OnPressSettings();
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ResumeButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* SettingsButton;
+
+private:
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> SettingsMenuClass;
 };
