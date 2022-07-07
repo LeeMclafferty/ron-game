@@ -65,6 +65,7 @@ void AKitchenGameMode::StartSounds()
 {
 	if (GI)
 	{
+		//UGameplayStatics::SetSoundMixClassOverride(GetWorld(), GI->GetMasterSoundMix(), GI->GetMasterSoundClass(), 1.f);
 		GI->PlaySound();
 	}
 }
