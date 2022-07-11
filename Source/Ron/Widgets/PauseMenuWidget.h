@@ -24,6 +24,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnPressSettings();
 
+	UFUNCTION(BlueprintCallable)
+	void OnPressQuit();
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ResumeButton;
 

@@ -13,6 +13,15 @@ class ARonGameMode : public AGameModeBase
 
 public:
 	ARonGameMode();
+
+	UFUNCTION(BlueprintCallable, Category = "UMG Game")
+	void ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass);
+
+	UPROPERTY()
+	class UUserWidget* CurrentWidget;
+protected:
+	virtual void BeginPlay() override;
+
 };
 
 

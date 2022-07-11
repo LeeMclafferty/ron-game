@@ -11,9 +11,15 @@
 #include "Ron/World/Door.h"
 #include "Ron/Widgets/GameplayWidget.h"
 #include "Ron/Framework/RonGameInstance.h"
+#include"Ron/Player/RonController.h"
 
 AKitchenGameMode::AKitchenGameMode()
-:IsOnQuestOne(false), IsOnQuestTwo(false), IsOnQuestThree(false), HasFoundRecipe(false), CurrentWidget(nullptr), GI(nullptr), HasFinalKey(false)
+:IsOnQuestOne(false), 
+IsOnQuestTwo(false), 
+IsOnQuestThree(false), 
+HasFoundRecipe(false), 
+GI(nullptr),
+HasFinalKey(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -21,14 +27,16 @@ AKitchenGameMode::AKitchenGameMode()
 void AKitchenGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
 	SetGamInstance();
+	PC = GetController();
 	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), StartingWidgetClass);
 	ChangeMenuWidget(StartingWidgetClass);
 	SetupKitchQuestsText();
 	SpawnActorsOnBeginPlay();
 	IsOnQuestOne = true;
 	StartSounds();
-	
+	PC->EnableGameplayInput();
 
 	if (FinalKey)
 	{
@@ -37,23 +45,6 @@ void AKitchenGameMode::BeginPlay()
 	}
 
 	SetExitDoorKey();
-}
-
-void AKitchenGameMode::ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass)
-{
-	if (CurrentWidget)
-	{
-		CurrentWidget->RemoveFromViewport();
-		CurrentWidget = nullptr;
-	}
-	if (NewWidgetClass)
-	{
-		CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), NewWidgetClass);
-		if (CurrentWidget)
-		{
-			CurrentWidget->AddToViewport();
-		}
-	}
 }
 
 FString AKitchenGameMode::GetKitchenQuest(int index)
@@ -66,7 +57,7 @@ void AKitchenGameMode::StartSounds()
 	if (GI)
 	{
 		//UGameplayStatics::SetSoundMixClassOverride(GetWorld(), GI->GetMasterSoundMix(), GI->GetMasterSoundClass(), 1.f);
-		GI->PlaySound();
+		GI->PlaySound(GI->VolumeMultiplier);
 	}
 }
 
@@ -93,7 +84,6 @@ void AKitchenGameMode::Tick(float DeltaSeconds)
 	if (UGameplayWidget* GameplayWidget = Cast<UGameplayWidget>(CurrentWidget))
 	{
 		GameplayWidget->ChooseQuest();
-		//GEngine->AddOnScreenDebuGIessage(-1, 2, FColor::Purple, FString::Printf(TEXT("HasRecipe: %i"), CheckForAllIngredients()));
 	}
 }
 
@@ -198,6 +188,11 @@ void AKitchenGameMode::CheckQuestIndex()
 		IsOnQuestTwo = false;
 		IsOnQuestThree = true;
 	}
+}
+
+ARonController* AKitchenGameMode::GetController() const
+{
+	return Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
 
 void AKitchenGameMode::SpawnExitDoor()

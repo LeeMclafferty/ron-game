@@ -108,7 +108,7 @@ void ALargePickup::OnDragStop()
 	Player->SetHoldingItem(false);
 	Player->SetHeldActor(nullptr);
 	Player->GetCharacterMovement()->MaxWalkSpeed = 175;
-	PC->PlayerInput->SetMouseSensitivity(.07);
+	PC->PlayerInput->SetMouseSensitivity(.04);
 	IsBeingHeld = false;
 	StaticMesh->CanCharacterStepUpOn = ECB_Yes;
 }

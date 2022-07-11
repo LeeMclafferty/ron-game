@@ -26,10 +26,13 @@ public:
 	void SetHoldingItem(bool IsHolding) { HasItemHeld = IsHolding; }
 	void SetActorBeingLooted(class ALootable* Lootable) { ActorBeingLooted = Lootable; }
 
-	FVector GetHoldLocation() { return HoldLocation->GetComponentLocation(); }
+	FVector GetHoldLocation() const { return HoldLocation->GetComponentLocation(); } 
 
 	UFUNCTION(BlueprintCallable)
-	class ALootable* GetActorBeingLooted() { return ActorBeingLooted; }
+	class ALootable* GetActorBeingLooted() const{ return ActorBeingLooted; }
+
+	UFUNCTION(BlueprintCallable)
+	bool CanGrab() const { return LookedAtActor ? true : false; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,7 +40,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* HoldLocation;
-
+	 
 private:
 	// Out params as arguments
 	bool LookTrace(FHitResult& Hit, FVector& LookDirection);

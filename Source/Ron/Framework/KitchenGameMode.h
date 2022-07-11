@@ -24,9 +24,6 @@ public:
 	bool CanActivateLights() { return HasFinalKey ? true :false; }
 
 	UFUNCTION(BlueprintCallable, Category = "UMG Game")
-	void ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass);
-
-	UFUNCTION(BlueprintCallable, Category = "UMG Game")
 	FString GetKitchenQuest(int index);
 
 	bool IsOnQuestOne;
@@ -36,11 +33,8 @@ public:
 	bool HasFoundRecipe;
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG Game")
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> StartingWidgetClass;
-
-	UPROPERTY()
-	UUserWidget* CurrentWidget;
 
 	void StartSounds();
 
@@ -75,4 +69,7 @@ private:
 	void SetupKitchQuestsText();
 
 	void CheckQuestIndex();
+
+	class ARonController* GetController() const;
+	class ARonController* PC;
 };

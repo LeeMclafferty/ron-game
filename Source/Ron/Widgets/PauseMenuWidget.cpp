@@ -11,13 +11,7 @@ bool UPauseMenuWidget::Initialize()
 {
 	bool success = Super::Initialize();
 
-	if (success)
-	{
-
-		return success;
-	}
-
-	return false;
+	return success;
 }
 
 void UPauseMenuWidget::OnPressResume()
@@ -43,4 +37,11 @@ void UPauseMenuWidget::OnPressSettings()
 			}
 		}
 	}
+}
+
+void UPauseMenuWidget::OnPressQuit()
+{
+	// Need to add a "Are you Sure?" widget so you cant close on accident.
+	if(auto* PC = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+		UKismetSystemLibrary::QuitGame(PC->GetOwner(), PC, EQuitPreference::Quit, false);
 }

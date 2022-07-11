@@ -14,6 +14,7 @@ ARonController::ARonController()
 void ARonController::BeginPlay()
 {
 	GetKitchenGamemode();
+	PlayerInput->SetMouseSensitivity(.04);
 }
 
 void ARonController::GetKitchenGamemode()
