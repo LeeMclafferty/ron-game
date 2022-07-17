@@ -73,6 +73,7 @@ void UInventoryItemWidget::SpawnItemFromLootable()
 	if (ActorBeingLooted)
 	{
 		ActorBeingLooted->SpawnItem(ActorBeingLooted->AllItemData[ButtonIndex]->ItemClass);
+		ActorBeingLooted->RemoveByIndex(ButtonIndex);
 		RemoveFromParent();
 	}
 }

@@ -135,7 +135,7 @@ void AKitchenGameMode::SpawnCookingPot()
 void AKitchenGameMode::SpawnFinalKey()
 {
 	FVector Scale = FVector::OneVector;
-	FVector Location = FVector(-448.107635, -686.612488, 296.153015);
+	FVector Location = FVector(0.000000, 0.000000, 67.526164);
 	FRotator Rotation = FRotator::ZeroRotator;
 	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
 	FActorSpawnParameters SpawnParams;
@@ -197,8 +197,8 @@ ARonController* AKitchenGameMode::GetController() const
 
 void AKitchenGameMode::SpawnExitDoor()
 {
-	FVector Scale = FVector(0.500000, 0.500000, 0.541599);
-	FVector Location = FVector( -1556.413940, -157.914383, 436.647308);
+	FVector Scale = FVector::OneVector;
+	FVector Location = FVector(-1544.647671, -154.974192, 465.966061);
 	FRotator Rotation = FRotator(0, 90.f, 0);
 	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
 	FActorSpawnParameters SpawnParams;

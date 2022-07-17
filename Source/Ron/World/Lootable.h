@@ -27,6 +27,7 @@ public:
 	UItemData* ItemOne;
 
 	void SpawnItem(TSubclassOf<class AInteractable>ItemClass);
+	void RemoveByIndex(int32 index);
 
 private:
 
@@ -43,6 +44,4 @@ private:
 
 	void LoadInventoryWidget();
 	void SetUIPlayerInput();
-
-	
 };

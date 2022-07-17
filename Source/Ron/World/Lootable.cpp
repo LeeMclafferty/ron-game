@@ -23,7 +23,8 @@ void ALootable::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ItemOne = AllItemData[0];
+	if(AllItemData[0])
+		ItemOne = AllItemData[0];
 }
 
 void ALootable::Interact()
@@ -62,6 +63,11 @@ void ALootable::SetUIPlayerInput()
 	{
 		PlayerContoller->EnableUIInput();
 	}
+}
+
+void ALootable::RemoveByIndex(int32 index)
+{
+	AllItemData.RemoveAt(index);
 }
 
 void ALootable::SpawnItem(TSubclassOf<class AInteractable>ItemClass)
