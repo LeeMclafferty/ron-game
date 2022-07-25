@@ -20,10 +20,18 @@ public:
 	void CloseWiget();
 	bool Initialize() override;
 
-protected:
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetupScrollBox();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ClearScrollBox();
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<class UInventoryItemWidget*> ItemWidgets;
+
+
+protected:
+
 
 private:
 
@@ -35,5 +43,8 @@ private:
 	
 	void InitWidget();
 	void SetupCloseButton();
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundCue* SoundToPlay;
 	
 };

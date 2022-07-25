@@ -110,6 +110,7 @@ void ADoor::ActivateDoor()
 			IsClosing = false;
 			IsOpening = true;
 			DoorIsOpen = true;
+			UE_LOG(LogTemp, Warning, TEXT("Open"));
 		}
 		else
 		{

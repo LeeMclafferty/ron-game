@@ -13,7 +13,9 @@ class RON_API AInteractable : public AActor
 	
 public:	
 	// Sets default values for this actor's properties
+	
 	AInteractable();
+	
 	virtual void Interact();
 
 protected:

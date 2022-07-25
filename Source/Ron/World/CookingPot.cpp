@@ -4,6 +4,10 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
+
 
 #include "Ron/World/Ingredient.h"
 #include "Ron/World/Sink.h"
@@ -27,6 +31,14 @@ ACookingPot::ACookingPot()
 	HasPasta = false;
 	HasSalt = false;
 	HasFire = false;
+	HasPlayedSound = false;
+
+/*	static ConstructorHelpers::FObjectFinder<USoundCue>FireAudio(TEXT("/Game/Sounds/SCue_WhereDoesFireComeFrom.SCue_WhereDoesFireComeFrom"));
+	if (FireAudio.Succeeded())
+	{
+		FireSound = FireAudio.Object;
+	}*/
+
  
 }
 
@@ -46,7 +58,7 @@ void ACookingPot::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	//GEngine->AddOnScreenDebugMessage(1, 3, FColor::Purple, FString::Printf(TEXT("Tick")));
-
+	PlaySound();
 	if (HasAnyIngridents())
 	{
 		if (IsTippedOver())
@@ -161,6 +173,16 @@ void ACookingPot::OnTipOver()
 			}
 		}
 		// Need to add a water spill VFX to, but I don't thing there will be a mesh attached to this. 
+	}
+}
+
+void ACookingPot::PlaySound()
+{
+	if (HasWater && HasSalt && HasPasta && !HasPlayedSound)
+	{
+		HasPlayedSound = true;
+		if(FireSound)
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)FireSound, GetActorLocation());
 	}
 }
 

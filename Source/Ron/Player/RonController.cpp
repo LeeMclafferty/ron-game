@@ -54,6 +54,7 @@ void ARonController::ResumeGame()
 	EnableGameplayInput();
 	IsGamePaused = false;
 	UGameplayStatics::SetGamePaused(GetWorld(), IsGamePaused);
+
 	if(PlayerHudClass)
 		KitchenGameMode->ChangeMenuWidget(PlayerHudClass);
 }

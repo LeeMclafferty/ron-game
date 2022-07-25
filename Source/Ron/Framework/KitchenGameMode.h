@@ -25,7 +25,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UMG Game")
 	FString GetKitchenQuest(int index);
-
+	
+	bool IsQuestDefault;
 	bool IsOnQuestOne;
 	bool IsOnQuestTwo;
 	bool IsOnQuestThree;

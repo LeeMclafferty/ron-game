@@ -61,4 +61,11 @@ private:
 
 	UFUNCTION()
 	void OnTipOver();
+
+	class USoundCue* FireSound;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	bool HasPlayedSound;
+
+	void PlaySound();
 };

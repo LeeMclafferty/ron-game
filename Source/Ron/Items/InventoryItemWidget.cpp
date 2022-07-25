@@ -10,6 +10,7 @@
 #include "Ron/Player/CharacterBase.h"
 #include "Ron/World/Lootable.h"
 #include "Ron/Items/ItemData.h"
+#include "Ron/Items/LootableInventoryWidget.h"
 
 bool UInventoryItemWidget::Initialize()
 {
@@ -75,5 +76,23 @@ void UInventoryItemWidget::SpawnItemFromLootable()
 		ActorBeingLooted->SpawnItem(ActorBeingLooted->AllItemData[ButtonIndex]->ItemClass);
 		ActorBeingLooted->RemoveByIndex(ButtonIndex);
 		RemoveFromParent();
+		ActorBeingLooted->GetInventoryWidget()->SetupScrollBox();
+	}
+	
+}
+
+void UInventoryItemWidget::DisableClick()
+{
+	if (auto* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	{
+		PC->bEnableClickEvents = false;
+	}
+}
+
+void UInventoryItemWidget::EnableClick()
+{
+	if (auto* PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	{
+		PC->bEnableClickEvents = true;
 	}
 }

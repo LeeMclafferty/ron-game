@@ -23,8 +23,8 @@ void ALootable::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(AllItemData[0])
-		ItemOne = AllItemData[0];
+//	if(AllItemData[0])
+	//	ItemOne = AllItemData[0];
 }
 
 void ALootable::Interact()

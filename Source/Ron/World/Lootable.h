@@ -29,6 +29,8 @@ public:
 	void SpawnItem(TSubclassOf<class AInteractable>ItemClass);
 	void RemoveByIndex(int32 index);
 
+	class ULootableInventoryWidget* GetInventoryWidget() const { return InventoryWidget; }
+
 private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Items")

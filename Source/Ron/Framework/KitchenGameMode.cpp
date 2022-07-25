@@ -14,7 +14,8 @@
 #include"Ron/Player/RonController.h"
 
 AKitchenGameMode::AKitchenGameMode()
-:IsOnQuestOne(false), 
+:IsQuestDefault(false), 
+IsOnQuestOne(false), 
 IsOnQuestTwo(false), 
 IsOnQuestThree(false), 
 HasFoundRecipe(false), 
@@ -34,9 +35,10 @@ void AKitchenGameMode::BeginPlay()
 	ChangeMenuWidget(StartingWidgetClass);
 	SetupKitchQuestsText();
 	SpawnActorsOnBeginPlay();
-	IsOnQuestOne = true;
+	IsQuestDefault = true;
 	StartSounds();
-	PC->EnableGameplayInput();
+	if(PC)
+		PC->EnableGameplayInput();
 
 	if (FinalKey)
 	{
@@ -159,6 +161,7 @@ void AKitchenGameMode::SetExitDoorKey()
 
 void AKitchenGameMode::SetupKitchQuestsText()
 {
+	FString QuestDefault("");
 	FString QuestOne("Find mom's secret recipe!");
 	FString QuestTwo("Put all of the ingredients into the tall pot.");
 	FString QuestThree("Use the key to get to a safe place!");
@@ -170,19 +173,19 @@ void AKitchenGameMode::SetupKitchQuestsText()
 
 void AKitchenGameMode::CheckQuestIndex()
 {
-	if (!HasFoundRecipe)
+	if (!HasFoundRecipe && !IsQuestDefault)
 	{
 		IsOnQuestOne = true;
 		IsOnQuestTwo = false;
 		IsOnQuestThree = false;
 	}
-	if (HasFoundRecipe && !CheckForAllIngredients())
+	else if (HasFoundRecipe && !CheckForAllIngredients())
 	{
 		IsOnQuestOne = false;
 		IsOnQuestTwo = true;
 		IsOnQuestThree = false;
 	}
-	if (HasFoundRecipe && CheckForAllIngredients() && HasFinalKey)
+	else if (HasFoundRecipe && CheckForAllIngredients() && HasFinalKey)
 	{
 		IsOnQuestOne = false;
 		IsOnQuestTwo = false;

@@ -51,5 +51,11 @@ private:
 	UFUNCTION()
 	void SpawnItemFromLootable();
 
+	UFUNCTION()
+	void DisableClick();
+
+	UFUNCTION()
+	void EnableClick();
+
 	
 };

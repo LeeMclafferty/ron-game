@@ -10,6 +10,7 @@
 #include "Ron/Player/CharacterBase.h"
 #include "Ron/World/Lootable.h"
 #include "Ron/Items/InventoryItemWidget.h"
+#include "Ron/World/FridgeLootable.h"
 
 bool ULootableInventoryWidget::Initialize()
 {
@@ -26,12 +27,22 @@ bool ULootableInventoryWidget::Initialize()
 
 void ULootableInventoryWidget::CloseWiget()
 {
+	static bool HasBeenClosed = false;
 	if (ARonController* PlayerContoller = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
 	{
 		PlayerContoller->EnableGameplayInput();
 		RemoveFromParent();
 		if (ACharacterBase* PlayerCharacter = Cast<ACharacterBase>(PlayerContoller->GetCharacter()))
 		{
+			
+			if (AFridgeLootable* Lootable = Cast<AFridgeLootable>(PlayerCharacter->GetActorBeingLooted()))
+			{
+				if (SoundToPlay && !HasBeenClosed)
+				{
+					HasBeenClosed = true;
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)SoundToPlay, PlayerCharacter->GetActorLocation());
+				}
+			}
 			PlayerCharacter->SetActorBeingLooted(nullptr);
 		}
 	}
