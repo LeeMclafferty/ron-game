@@ -5,6 +5,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 
 ASink::ASink()
@@ -31,10 +33,26 @@ void ASink::Interact()
 	{
 		TurnedOn = true;
 		WaterMesh->SetHiddenInGame(false);
+		PlayWaterSound((USoundBase*)RunningWaterSFX);
 	}
 	else
 	{
 		TurnedOn = false;
 		WaterMesh->SetHiddenInGame(true);
+		RunningWaterSFX->VolumeMultiplier = 0;
 	}
+}
+
+void ASink::Tick(float DeltaSeconds)
+{
+
+}
+
+void ASink::PlayWaterSound(USoundBase* SoundtoPlay)
+{
+	if (!SoundtoPlay)
+		return;
+
+	RunningWaterSFX->VolumeMultiplier = 1;
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundtoPlay, GetActorLocation());
 }

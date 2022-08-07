@@ -42,5 +42,15 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UPointLightComponent* BurnerLight;
 
+	UPROPERTY(EditDefaultsOnly)
+	class USoundCue* StoveTick;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundCue* StoveFlame;
+
+	void TurnOn();
+	void TurnOff();
+
+	void PlaySound(USoundBase* SoundtoPlay, USoundCue* SoundCue);
 	
 };

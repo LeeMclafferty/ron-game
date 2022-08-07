@@ -5,6 +5,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AStove::AStove()
 {
@@ -37,14 +39,39 @@ void AStove::Interact()
 	// TODO: Add Fire VFX
 	if (!IsTurnedOn)
 	{
-		BurnerLight->SetVisibility(true);
-		FireMesh->SetHiddenInGame(false);
-		IsTurnedOn = true;
+		PlaySound((USoundBase*)StoveTick, StoveTick);
+		FTimerHandle OnTimer;
+		GetWorld()->GetTimerManager().SetTimer(OnTimer, this, &AStove::TurnOn, 1.2, false);
 	}
 	else
 	{
-		BurnerLight->SetVisibility(false);
-		FireMesh->SetHiddenInGame(true);
-		IsTurnedOn = false;
+		TurnOff();
 	}
 }
+
+void AStove::TurnOn()
+{
+	PlaySound((USoundBase*)StoveFlame, StoveFlame);
+	BurnerLight->SetVisibility(true);
+	FireMesh->SetHiddenInGame(false);
+	IsTurnedOn = true;
+}
+
+void AStove::TurnOff()
+{
+	StoveTick->VolumeMultiplier = 0;
+	StoveFlame->VolumeMultiplier = 0;
+	BurnerLight->SetVisibility(false);
+	FireMesh->SetHiddenInGame(true);
+	IsTurnedOn = false;
+}
+
+void AStove::PlaySound(USoundBase* SoundtoPlay, USoundCue* SoundCue)
+{
+	if (!SoundtoPlay || !SoundCue)
+		return;
+
+	SoundCue->VolumeMultiplier = 1;
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundtoPlay, BurnerBox->GetComponentLocation());
+}
+

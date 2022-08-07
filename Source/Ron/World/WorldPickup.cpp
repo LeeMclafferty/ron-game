@@ -16,7 +16,7 @@ AWorldPickup::AWorldPickup()
 	RootComponent = StaticMesh;
 	StaticMesh->SetCollisionProfileName("BlockAll");
 	// If Mass is too low, object seem to fly off into no where. 
-	StaticMesh->SetMassOverrideInKg(NAME_None, 100.f, true);
+	StaticMesh->SetMassOverrideInKg(NAME_None, 5000.f, true);
 	StaticMesh->SetSimulatePhysics(true);
 	
 	IsBeingHeld = false;

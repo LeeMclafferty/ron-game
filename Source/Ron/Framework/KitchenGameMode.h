@@ -32,6 +32,9 @@ public:
 	bool IsOnQuestThree;
 
 	bool HasFoundRecipe;
+
+	UFUNCTION(BlueprintCallable)
+	bool DoesHaveFinalKey() { return HasFinalKey; }
 protected:
 
 	UPROPERTY(EditDefaultsOnly)
@@ -41,12 +44,12 @@ protected:
 
 private:
 	class URonGameInstance* GI;
-	void SetGamInstance();
+	void Setup();
 	bool HasFinalKey;
 
-	// Have to spawn on begin play to have a C++ ref
 	class ACookingPot* CookingPot;
 	class AUnlockKey* FinalKey;
+	class AStoryRadio* FinalRadio;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ACookingPot> CookingPotClass;
@@ -54,6 +57,8 @@ private:
 	TSubclassOf<class AUnlockKey> FinalKeyClass;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ADoor> ExitDoorClass;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class AStoryRadio> FinalRadioClass;
 
 	bool CheckForAllIngredients();
 	void RevealKey();
@@ -73,4 +78,9 @@ private:
 
 	class ARonController* GetController() const;
 	class ARonController* PC;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UNiagaraSystem* KeySpawnVFX;
+
+
 };

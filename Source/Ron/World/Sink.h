@@ -26,6 +26,8 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* StaticMesh;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 private:
 
 	UPROPERTY(VisibleAnywhere)
@@ -39,5 +41,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* WaterMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundCue* RunningWaterSFX;
+
+	void PlayWaterSound(class USoundBase* SoundtoPlay);
 	
 };

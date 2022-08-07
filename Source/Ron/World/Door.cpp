@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "Ron/World/Key.h"
 
@@ -114,6 +115,7 @@ void ADoor::ActivateDoor()
 		}
 		else
 		{
+			PlaySound((USoundBase*)LockSound);
 			UE_LOG(LogTemp, Warning, TEXT("Door Locked"));
 		}
 	}
@@ -146,5 +148,13 @@ void ADoor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 void ADoor::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 
+}
+
+void ADoor::PlaySound(USoundBase* SoundToPlay)
+{
+	if (!SoundToPlay)
+		return;
+
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToPlay, GetActorLocation());
 }
 

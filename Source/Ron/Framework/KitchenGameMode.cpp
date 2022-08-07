@@ -4,6 +4,8 @@
 #include "Ron/Framework/KitchenGameMode.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 
 #include "Ron/World/CookingPot.h"
@@ -11,7 +13,8 @@
 #include "Ron/World/Door.h"
 #include "Ron/Widgets/GameplayWidget.h"
 #include "Ron/Framework/RonGameInstance.h"
-#include"Ron/Player/RonController.h"
+#include "Ron/Player/RonController.h"
+#include "Ron/World/StoryRadio.h"
 
 AKitchenGameMode::AKitchenGameMode()
 :IsQuestDefault(false), 
@@ -29,7 +32,7 @@ void AKitchenGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetGamInstance();
+	Setup();
 	PC = GetController();
 	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), StartingWidgetClass);
 	ChangeMenuWidget(StartingWidgetClass);
@@ -37,6 +40,8 @@ void AKitchenGameMode::BeginPlay()
 	SpawnActorsOnBeginPlay();
 	IsQuestDefault = true;
 	StartSounds();
+
+
 	if(PC)
 		PC->EnableGameplayInput();
 
@@ -63,12 +68,14 @@ void AKitchenGameMode::StartSounds()
 	}
 }
 
-void AKitchenGameMode::SetGamInstance()
+void AKitchenGameMode::Setup()
 {
-	if (URonGameInstance* Inst = Cast<URonGameInstance>(UGameplayStatics::GetGameInstance(GetWorld())))
-	{
-		GI = Inst;
-	}
+	URonGameInstance* Inst = Cast<URonGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (!Inst)
+		return;
+
+	GI = Inst;
+
 }
 
 void AKitchenGameMode::Tick(float DeltaSeconds)
@@ -76,11 +83,11 @@ void AKitchenGameMode::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (CheckForAllIngredients())
 	{
-		if (!HasFinalKey)
-		{
-			HasFinalKey = true;
-			RevealKey();
-		}
+		if (HasFinalKey)
+			return;
+
+		HasFinalKey = true;
+		RevealKey();
 	}
 	CheckQuestIndex();
 	if (UGameplayWidget* GameplayWidget = Cast<UGameplayWidget>(CurrentWidget))
@@ -103,12 +110,15 @@ bool AKitchenGameMode::CheckForAllIngredients()
 
 void AKitchenGameMode::RevealKey()
 {
-	if (FinalKey)
-	{
-		HasFinalKey = true;
-		FinalKey->SetActorHiddenInGame(false);
-		FinalKey->SetActorEnableCollision(true);
-	}
+	if (!FinalKey || !KeySpawnVFX )
+		return;
+
+	HasFinalKey = true;
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), KeySpawnVFX, FinalKey->GetActorLocation());
+	//UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)KeySpawnSound);
+	FinalKey->SetActorHiddenInGame(false);
+	FinalKey->SetActorEnableCollision(true);
+	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Purple, FString::Printf(TEXT("RevealKey")));
 }
 
 void AKitchenGameMode::SpawnActorsOnBeginPlay()
@@ -136,27 +146,29 @@ void AKitchenGameMode::SpawnCookingPot()
 
 void AKitchenGameMode::SpawnFinalKey()
 {
+
+	if (!FinalKeyClass)
+		return;
+
 	FVector Scale = FVector::OneVector;
-	FVector Location = FVector(0.000000, 0.000000, 67.526164);
+	FVector Location = FVector(-303.353497, -695.778022, 291.443368);
 	FRotator Rotation = FRotator::ZeroRotator;
 	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
 	FActorSpawnParameters SpawnParams;
 
 	SpawnParams.bNoFail = true;
 
-	if (FinalKeyClass)
-	{
-		FinalKey = GetWorld()->SpawnActor<AUnlockKey>(FinalKeyClass, SpawnTransform, SpawnParams);
-	}
+	FinalKey = GetWorld()->SpawnActor<AUnlockKey>(FinalKeyClass, SpawnTransform, SpawnParams);
+	
 }
 
 void AKitchenGameMode::SetExitDoorKey()
 {
-	if (ExitDoor)
-	{
-		ExitDoor->LockDoor();
-		ExitDoor->SetUnlockKey(FinalKey);
-	}
+	if (!ExitDoor)
+		return;
+
+	ExitDoor->LockDoor();
+	ExitDoor->SetUnlockKey(FinalKey);
 }
 
 void AKitchenGameMode::SetupKitchQuestsText()
@@ -213,3 +225,4 @@ void AKitchenGameMode::SpawnExitDoor()
 		ExitDoor = GetWorld()->SpawnActor<ADoor>(ExitDoorClass, SpawnTransform, SpawnParams);
 	}
 }
+
