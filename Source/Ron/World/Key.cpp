@@ -3,6 +3,9 @@
 
 #include "Ron/World/Key.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "Ron/Player/CharacterBase.h"
 
 AUnlockKey::AUnlockKey()
 {
@@ -12,9 +15,26 @@ AUnlockKey::AUnlockKey()
 	StaticMesh->SetSimulatePhysics(false);
 }
 
+void AUnlockKey::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetupRefs();
+}
+
+void AUnlockKey::SetupRefs()
+{
+	if(auto PlayerChar = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		Character = PlayerChar;
+}
+
 void AUnlockKey::DisableKey()
 {	
-	//Add FX here later.
+	//Add FX here later
+	if (!Character)
+		return;
+
+	Character->SetHeldActor(nullptr);
 	Destroy();
 }
 

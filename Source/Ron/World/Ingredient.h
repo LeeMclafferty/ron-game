@@ -22,7 +22,7 @@ public:
 	bool GetIsSalt() { return IsSalt; }
 	bool GetIsNeeded() { return IsNeeded; }
 
-	void HandleDestruction();
+	void HandleDestruction(class ACharacterBase* Character);
 
 protected:
 

@@ -12,6 +12,7 @@
 #include "Ron/World/Ingredient.h"
 #include "Ron/World/Sink.h"
 #include "Ron/World/Stove.h"
+#include "Ron/Player/CharacterBase.h"
 
 ACookingPot::ACookingPot()
 {
@@ -33,19 +34,14 @@ ACookingPot::ACookingPot()
 	HasFire = false;
 	HasPlayedSound = false;
 
-/*	static ConstructorHelpers::FObjectFinder<USoundCue>FireAudio(TEXT("/Game/Sounds/SCue_WhereDoesFireComeFrom.SCue_WhereDoesFireComeFrom"));
-	if (FireAudio.Succeeded())
-	{
-		FireSound = FireAudio.Object;
-	}*/
-
- 
 }
 
 void ACookingPot::BeginPlay()
 {
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &ACookingPot::OnOverlapBegin);
 	Trigger->OnComponentEndOverlap.AddDynamic(this, &ACookingPot::OnOverlapEnd);
+
+	SetupRefs();
 }
 
 
@@ -80,12 +76,12 @@ void ACookingPot::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, clas
 			if (Ingredient->GetIsPasta())
 			{
 				HasPasta = true;
-				Ingredient->HandleDestruction();
+				Ingredient->HandleDestruction(Character);
 			}
 			else if (Ingredient->GetIsSalt())
 			{
 				HasSalt = true;
-				Ingredient->HandleDestruction();
+				Ingredient->HandleDestruction(Character);
 			}
 		}
 	}
@@ -111,7 +107,7 @@ void ACookingPot::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class 
 {
 	if (AStove* Stove = Cast<AStove>(OtherActor))
 	{
-			HasFire = false;
+		HasFire = false;
 	}
 }
 
@@ -184,6 +180,12 @@ void ACookingPot::PlaySound()
 		if(FireSound)
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)FireSound, GetActorLocation());
 	}
+}
+
+void ACookingPot::SetupRefs()
+{
+	if (auto Player = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		Character = Player;
 }
 
 bool ACookingPot::HasAllIngrediants()

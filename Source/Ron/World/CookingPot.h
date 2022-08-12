@@ -68,4 +68,8 @@ private:
 	bool HasPlayedSound;
 
 	void PlaySound();
+
+	void SetupRefs();
+
+	class ACharacterBase* Character;
 };

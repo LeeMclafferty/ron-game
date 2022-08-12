@@ -3,16 +3,21 @@
 
 #include "Ron/World/Ingredient.h"
 
+#include "Ron/Player/CharacterBase.h"
+
 AIngredient::AIngredient()
 {
 	IsPasta = false;
 	IsSalt = false;
 }
 
-void AIngredient::HandleDestruction()
+void AIngredient::HandleDestruction(ACharacterBase* Character)
 {
 	// TODO: make disappear smoothly with particles.
+	if (!Character)
+		return;
 
+	Character->SetHeldActor(nullptr);
 	Destroy();
 }
 

@@ -23,7 +23,15 @@ public:
 	void DisableKey();
 
 	virtual void Interact() override;
+
+protected:
+
+	virtual void BeginPlay() override;
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UBoxComponent* Trigger;
+
+	void SetupRefs();
+
+	class ACharacterBase* Character;
 };
