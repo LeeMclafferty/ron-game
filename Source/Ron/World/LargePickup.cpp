@@ -13,7 +13,6 @@ ALargePickup::ALargePickup()
 :ShowDebugLine(false), Floor(0.f), DragHeight(20.2), Player(nullptr), InterpSpeed(5.f), SpeedWhileDragging(85.f)
 {
 	//StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	StaticMesh->SetMassOverrideInKg(NAME_None, 9999.f, true);
 	StaticMesh->SetLinearDamping(10.f);
 	StaticMesh->SetAngularDamping(10.f);
 	
@@ -45,7 +44,7 @@ void ALargePickup::Tick(float DeltaSeconds)
 void ALargePickup::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	StaticMesh->SetMassOverrideInKg(NAME_None, 9999.f, true);
 	Player = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	PC = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }

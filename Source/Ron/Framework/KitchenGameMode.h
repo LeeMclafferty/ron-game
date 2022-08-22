@@ -61,7 +61,10 @@ private:
 	TSubclassOf<class AStoryRadio> FinalRadioClass;
 
 	bool CheckForAllIngredients();
+
+	UFUNCTION(Exec)
 	void RevealKey();
+
 	void SpawnActorsOnBeginPlay();
 	void SpawnCookingPot();
 	void SpawnFinalKey();

@@ -24,6 +24,7 @@ public:
 
 	void HandleDestruction(class ACharacterBase* Character);
 
+	virtual void Interact() override;
 protected:
 
 	UPROPERTY(EditDefaultsOnly)
@@ -33,5 +34,4 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	bool IsNeeded;
 	
-	virtual void Interact() override;
 };

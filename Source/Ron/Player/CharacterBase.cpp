@@ -141,6 +141,7 @@ void ACharacterBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	LookTrace(OutHit, OutDirection);
+	//UE_LOG(LogTemp, Warning, TEXT("HandDestruction"))
 	
 	if (HeldActor && HasItemHeld)
 	{	
@@ -161,17 +162,19 @@ void ACharacterBase::Tick(float DeltaTime)
 
 void ACharacterBase::UpdateHeldActorLoction()
 {
+
 	if (AController* PlayerController = GetController())
 	{
 		FVector Loc;
 		FRotator Rot;
 		PlayerController->GetPlayerViewPoint(Loc, Rot);
-		if (HeldActor) // If the actor is destroyed I want to reject the ptr is still valid.
+
+		if (HeldActor && HasItemHeld) // If the actor is destroyed I want to reject the ptr is still valid.
 		{
 			HeldActor->SetActorLocation(Loc + Rot.Vector() * ReachRange, true);
 			HeldActor->SetActorRotation(FRotator::ZeroRotator);
+			//GEngine->AddOnScreenDebugMessage(-1, .5, FColor::Purple, FString::Printf(TEXT("Held Actor: %s"), *HeldActor->GetName()));
 		}
-		//GEngine->AddOnScreenDebugMessage(-1, .5, FColor::Purple, FString::Printf(TEXT("Held Actor: %s"), *HeldActor->GetName()));
 	}
 }
 

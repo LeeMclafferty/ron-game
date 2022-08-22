@@ -34,8 +34,9 @@ void AUnlockKey::DisableKey()
 	if (!Character)
 		return;
 
-	Character->SetHeldActor(nullptr);
+	Character->SetHoldingItem(false);
 	Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("HandDestruction"))
 }
 
 void AUnlockKey::Interact()

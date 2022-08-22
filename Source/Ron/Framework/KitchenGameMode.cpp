@@ -118,7 +118,7 @@ void AKitchenGameMode::RevealKey()
 	//UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)KeySpawnSound);
 	FinalKey->SetActorHiddenInGame(false);
 	FinalKey->SetActorEnableCollision(true);
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Purple, FString::Printf(TEXT("RevealKey")));
+	//GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Purple, FString::Printf(TEXT("RevealKey")));
 }
 
 void AKitchenGameMode::SpawnActorsOnBeginPlay()

@@ -27,17 +27,16 @@ ACookingPot::ACookingPot()
 	//StaticMesh->SetWorldScale3D(FVector(.03, .03, .03));
 
 	// I don't want the pot to fly around.
-	StaticMesh->SetMassOverrideInKg(NAME_None, 2000.f);
 	HasWater = false;
 	HasPasta = false;
 	HasSalt = false;
 	HasFire = false;
 	HasPlayedSound = false;
-
 }
 
 void ACookingPot::BeginPlay()
 {
+	StaticMesh->SetMassOverrideInKg(NAME_None, 2000.f);
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &ACookingPot::OnOverlapBegin);
 	Trigger->OnComponentEndOverlap.AddDynamic(this, &ACookingPot::OnOverlapEnd);
 
@@ -76,11 +75,13 @@ void ACookingPot::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, clas
 			if (Ingredient->GetIsPasta())
 			{
 				HasPasta = true;
+				//Ingredient->Interact();
 				Ingredient->HandleDestruction(Character);
 			}
 			else if (Ingredient->GetIsSalt())
 			{
 				HasSalt = true;
+				//Ingredient->Interact();
 				Ingredient->HandleDestruction(Character);
 			}
 		}

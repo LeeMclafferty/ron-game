@@ -26,7 +26,7 @@ public:
 	void SetHoldingItem(bool IsHolding) { HasItemHeld = IsHolding; }
 	void SetActorBeingLooted(class ALootable* Lootable) { ActorBeingLooted = Lootable; }
 
-	FVector GetHoldLocation() const { return HoldLocation->GetComponentLocation(); } 
+	FVector GetHoldLocation() const { return HoldLocation->GetComponentLocation(); }
 
 	UFUNCTION(BlueprintCallable)
 	class ALootable* GetActorBeingLooted() const{ return ActorBeingLooted; }
@@ -71,12 +71,16 @@ private:
 
 	UFUNCTION()
 	void Interact();
+
 	UFUNCTION()
 	void DecreaseReach();
+
 	UFUNCTION()
 	void IncreaseReach();
+
 	UFUNCTION()
 	void UpdateHeldActorLoction();
+
 	UFUNCTION()
 	void DragHeldActor();
 
