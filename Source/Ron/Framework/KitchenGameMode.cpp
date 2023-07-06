@@ -1,12 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ron/Framework/KitchenGameMode.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
-
 
 #include "Ron/World/CookingPot.h"
 #include "Ron/World/Key.h"
@@ -17,212 +13,202 @@
 #include "Ron/World/StoryRadio.h"
 
 AKitchenGameMode::AKitchenGameMode()
-:IsQuestDefault(false), 
-IsOnQuestOne(false), 
-IsOnQuestTwo(false), 
-IsOnQuestThree(false), 
-HasFoundRecipe(false), 
-GI(nullptr),
-HasFinalKey(false)
+    : IsQuestDefault(false),
+    IsOnQuestOne(false),
+    IsOnQuestTwo(false),
+    IsOnQuestThree(false),
+    HasFoundRecipe(false),
+    GI(nullptr),
+    HasFinalKey(false)
 {
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
 }
 
 void AKitchenGameMode::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	Setup();
-	PC = GetController();
-	CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), StartingWidgetClass);
-	ChangeMenuWidget(StartingWidgetClass);
-	SetupKitchQuestsText();
-	SpawnActorsOnBeginPlay();
-	IsQuestDefault = true;
-	StartSounds();
+    Setup();
+    PC = GetController();
+    CurrentWidget = CreateWidget<UUserWidget>(GetWorld(), StartingWidgetClass);
+    ChangeMenuWidget(StartingWidgetClass);
+    SetupKitchenQuestsText();
+    SpawnActorsOnBeginPlay();
+    IsQuestDefault = true;
+    StartSounds();
 
+    if (PC)
+        PC->EnableGameplayInput();
 
-	if(PC)
-		PC->EnableGameplayInput();
+    if (FinalKey)
+    {
+        FinalKey->SetActorHiddenInGame(true);
+        FinalKey->SetActorEnableCollision(false);
+    }
 
-	if (FinalKey)
-	{
-		FinalKey->SetActorHiddenInGame(true);
-		FinalKey->SetActorEnableCollision(false);
-	}
-
-	SetExitDoorKey();
+    SetExitDoorKey();
 }
 
-FString AKitchenGameMode::GetKitchenQuest(int index)
+FString AKitchenGameMode::GetKitchenQuest(int Index)
 {
-	return KitchenQuestsText[index];
+    if (Index < 0 || Index >= KitchenQuestsText.Num())
+        return FString();
+
+    return KitchenQuestsText[Index];
 }
 
 void AKitchenGameMode::StartSounds()
 {
-	if (GI)
-	{
-		//UGameplayStatics::SetSoundMixClassOverride(GetWorld(), GI->GetMasterSoundMix(), GI->GetMasterSoundClass(), 1.f);
-		GI->PlaySound(GI->VolumeMultiplier);
-	}
+    if (GI)
+    {
+        GI->PlaySound(GI->VolumeMultiplier);
+    }
 }
 
 void AKitchenGameMode::Setup()
 {
-	URonGameInstance* Inst = Cast<URonGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	if (!Inst)
-		return;
+    URonGameInstance* Inst = Cast<URonGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+    if (!Inst)
+        return;
 
-	GI = Inst;
-
+    GI = Inst;
 }
 
 void AKitchenGameMode::Tick(float DeltaSeconds)
 {
-	Super::Tick(DeltaSeconds);
-	if (CheckForAllIngredients())
-	{
-		if (HasFinalKey)
-			return;
+    Super::Tick(DeltaSeconds);
+    if (CheckForAllIngredients())
+    {
+        if (HasFinalKey)
+            return;
 
-		HasFinalKey = true;
-		RevealKey();
-	}
-	CheckQuestIndex();
-	if (UGameplayWidget* GameplayWidget = Cast<UGameplayWidget>(CurrentWidget))
-	{
-		GameplayWidget->ChooseQuest();
-	}
+        HasFinalKey = true;
+        RevealKey();
+    }
+    CheckQuestIndex();
+    if (UGameplayWidget* GameplayWidget = Cast<UGameplayWidget>(CurrentWidget))
+    {
+        GameplayWidget->ChooseQuest();
+    }
 }
 
 bool AKitchenGameMode::CheckForAllIngredients()
 {
-	if (CookingPot)
-	{
-		if(CookingPot->HasAllIngrediants())
-		{
-			return true;
-		}
-	}
-	return false;
+    if (CookingPot)
+    {
+        if (CookingPot->HasAllIngredients())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void AKitchenGameMode::RevealKey()
 {
-	if (!FinalKey || !KeySpawnVFX )
-		return;
+    if (!FinalKey || !KeySpawnVFX)
+        return;
 
-	HasFinalKey = true;
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), KeySpawnVFX, FinalKey->GetActorLocation());
-	//UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)KeySpawnSound);
-	FinalKey->SetActorHiddenInGame(false);
-	FinalKey->SetActorEnableCollision(true);
-	//GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Purple, FString::Printf(TEXT("RevealKey")));
+    HasFinalKey = true;
+    UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), KeySpawnVFX, FinalKey->GetActorLocation());
+    FinalKey->SetActorHiddenInGame(false);
+    FinalKey->SetActorEnableCollision(true);
 }
 
 void AKitchenGameMode::SpawnActorsOnBeginPlay()
 {
-	SpawnCookingPot();
-	SpawnFinalKey();
-	SpawnExitDoor();
+    SpawnCookingPot();
+    SpawnFinalKey();
+    SpawnExitDoor();
 }
 
 void AKitchenGameMode::SpawnCookingPot()
 {
-	FVector Scale = FVector::OneVector;
-	FVector Location = FVector(-294.915436, -702.515381, 256.000519);
-	FRotator Rotation = FRotator::ZeroRotator;
-	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
-	FActorSpawnParameters SpawnParams;
+    if (!CookingPotClass)
+        return;
 
-	SpawnParams.bNoFail = true;
+    FVector Scale = FVector::OneVector;
+    FVector Location = FVector(-294.915436, -702.515381, 256.000519);
+    FRotator Rotation = FRotator::ZeroRotator;
+    FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.bNoFail = true;
 
-	if (CookingPotClass)
-	{
-		CookingPot = GetWorld()->SpawnActor<ACookingPot>(CookingPotClass, SpawnTransform, SpawnParams);
-	}
+    CookingPot = GetWorld()->SpawnActor<ACookingPot>(CookingPotClass, SpawnTransform, SpawnParams);
 }
 
 void AKitchenGameMode::SpawnFinalKey()
 {
+    if (!FinalKeyClass)
+        return;
 
-	if (!FinalKeyClass)
-		return;
+    FVector Scale = FVector::OneVector;
+    FVector Location = FVector(-303.353497, -695.778022, 291.443368);
+    FRotator Rotation = FRotator::ZeroRotator;
+    FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.bNoFail = true;
 
-	FVector Scale = FVector::OneVector;
-	FVector Location = FVector(-303.353497, -695.778022, 291.443368);
-	FRotator Rotation = FRotator::ZeroRotator;
-	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
-	FActorSpawnParameters SpawnParams;
-
-	SpawnParams.bNoFail = true;
-
-	FinalKey = GetWorld()->SpawnActor<AUnlockKey>(FinalKeyClass, SpawnTransform, SpawnParams);
-	
+    FinalKey = GetWorld()->SpawnActor<AUnlockKey>(FinalKeyClass, SpawnTransform, SpawnParams);
 }
 
 void AKitchenGameMode::SetExitDoorKey()
 {
-	if (!ExitDoor)
-		return;
+    if (!ExitDoor)
+        return;
 
-	ExitDoor->LockDoor();
-	ExitDoor->SetUnlockKey(FinalKey);
+    ExitDoor->LockDoor();
+    ExitDoor->SetUnlockKey(FinalKey);
 }
 
-void AKitchenGameMode::SetupKitchQuestsText()
+void AKitchenGameMode::SetupKitchenQuestsText()
 {
-	FString QuestDefault("");
-	FString QuestOne("Find mom's secret recipe!");
-	FString QuestTwo("Put all of the ingredients into the tall pot.");
-	FString QuestThree("Use the key to get to a safe place!");
-
-	KitchenQuestsText.Emplace(QuestOne);
-	KitchenQuestsText.Emplace(QuestTwo);
-	KitchenQuestsText.Emplace(QuestThree);
+    KitchenQuestsText.Emplace("Find mom's secret recipe!");
+    KitchenQuestsText.Emplace("Put all of the ingredients into the tall pot.");
+    KitchenQuestsText.Emplace("Use the key to get to a safe place!");
 }
 
 void AKitchenGameMode::CheckQuestIndex()
 {
-	if (!HasFoundRecipe && !IsQuestDefault)
-	{
-		IsOnQuestOne = true;
-		IsOnQuestTwo = false;
-		IsOnQuestThree = false;
-	}
-	else if (HasFoundRecipe && !CheckForAllIngredients())
-	{
-		IsOnQuestOne = false;
-		IsOnQuestTwo = true;
-		IsOnQuestThree = false;
-	}
-	else if (HasFoundRecipe && CheckForAllIngredients() && HasFinalKey)
-	{
-		IsOnQuestOne = false;
-		IsOnQuestTwo = false;
-		IsOnQuestThree = true;
-	}
+    if (!HasFoundRecipe && !IsQuestDefault)
+    {
+        IsOnQuestOne = true;
+        IsOnQuestTwo = false;
+        IsOnQuestThree = false;
+    }
+    else if (HasFoundRecipe && !CheckForAllIngredients())
+    {
+        IsOnQuestOne = false;
+        IsOnQuestTwo = true;
+        IsOnQuestThree = false;
+    }
+    else if (HasFoundRecipe && CheckForAllIngredients() && HasFinalKey)
+    {
+        IsOnQuestOne = false;
+        Here's the refactored code for the remaining part of the "KitchenGameMode" class:
+
+            ```cpp
+            IsOnQuestTwo = false;
+        IsOnQuestThree = true;
+    }
 }
 
 ARonController* AKitchenGameMode::GetController() const
 {
-	return Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    return Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 }
 
 void AKitchenGameMode::SpawnExitDoor()
 {
-	FVector Scale = FVector::OneVector;
-	FVector Location = FVector(-1544.647671, -154.974192, 465.966061);
-	FRotator Rotation = FRotator(0, 90.f, 0);
-	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
-	FActorSpawnParameters SpawnParams;
+    if (!ExitDoorClass)
+        return;
 
-	SpawnParams.bNoFail = true;
+    FVector Scale = FVector::OneVector;
+    FVector Location = FVector(-1544.647671, -154.974192, 465.966061);
+    FRotator Rotation = FRotator(0, 90.f, 0);
+    FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.bNoFail = true;
 
-	if (ExitDoorClass)
-	{
-		ExitDoor = GetWorld()->SpawnActor<ADoor>(ExitDoorClass, SpawnTransform, SpawnParams);
-	}
+    ExitDoor = GetWorld()->SpawnActor<ADoor>(ExitDoorClass, SpawnTransform, SpawnParams);
 }
-

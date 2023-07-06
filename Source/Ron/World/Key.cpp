@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ron/World/Key.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,13 +21,14 @@ void AUnlockKey::BeginPlay()
 
 void AUnlockKey::SetupRefs()
 {
-	if(auto PlayerChar = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	if (ACharacterBase* PlayerChar = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
 		Character = PlayerChar;
+	}
 }
 
 void AUnlockKey::DisableKey()
-{	
-	//Add FX here later
+{
 	if (!Character)
 		return;
 
@@ -42,5 +40,4 @@ void AUnlockKey::DisableKey()
 void AUnlockKey::Interact()
 {
 	Super::Interact();
-
 }

@@ -1,13 +1,7 @@
-
-
 #include "Ron/World/CookingPot.h"
 #include "Components/BoxComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
-#include "UObject/ConstructorHelpers.h"
-#include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
-
 
 #include "Ron/World/Ingredient.h"
 #include "Ron/World/Sink.h"
@@ -18,31 +12,22 @@ ACookingPot::ACookingPot()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Component"));
+	Trigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger"));
 	Trigger->SetupAttachment(RootComponent);
 
-	IngredientSpawn = CreateDefaultSubobject<USceneComponent>(TEXT("Ingredient Spawn"));
-	IngredientSpawn->SetupAttachment(RootComponent);
-
-	//StaticMesh->SetWorldScale3D(FVector(.03, .03, .03));
-
-	// I don't want the pot to fly around.
-	HasWater = false;
-	HasPasta = false;
-	HasSalt = false;
-	HasFire = false;
-	HasPlayedSound = false;
+	IngredientSpawn = CreateDefaultSubobject<USceneComponent>(TEXT("IngredientSpawn"));
 }
 
 void ACookingPot::BeginPlay()
 {
+	Super::BeginPlay();
+
 	StaticMesh->SetMassOverrideInKg(NAME_None, 2000.f);
 	Trigger->OnComponentBeginOverlap.AddDynamic(this, &ACookingPot::OnOverlapBegin);
 	Trigger->OnComponentEndOverlap.AddDynamic(this, &ACookingPot::OnOverlapEnd);
 
 	SetupRefs();
 }
-
 
 void ACookingPot::Interact()
 {
@@ -52,55 +37,48 @@ void ACookingPot::Interact()
 void ACookingPot::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	//GEngine->AddOnScreenDebugMessage(1, 3, FColor::Purple, FString::Printf(TEXT("Tick")));
+
 	PlaySound();
-	if (HasAnyIngridents())
+
+	if (HasAnyIngredients() && IsTippedOver())
 	{
-		if (IsTippedOver())
-		{
-			OnTipOver();
-		}
+		OnTipOver();
 	}
 
 	UpdateOverlaps(true);
 }
 
-// I want to clean this up into multiple small functions.
 void ACookingPot::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (AIngredient* Ingredient = Cast<AIngredient>(OtherActor))
 	{
-		if (Ingredient->GetIsNeeded())
+		if (Ingredient->bIsNeeded)
 		{
-			if (Ingredient->GetIsPasta())
+			if (Ingredient->bIsPasta)
 			{
 				HasPasta = true;
-				//Ingredient->Interact();
 				Ingredient->HandleDestruction(Character);
 			}
-			else if (Ingredient->GetIsSalt())
+			else if (Ingredient->bIsSalt)
 			{
 				HasSalt = true;
-				//Ingredient->Interact();
 				Ingredient->HandleDestruction(Character);
 			}
 		}
 	}
 	else if (ASink* Sink = Cast<ASink>(OtherActor))
 	{
-		//GEngine->AddOnScreenDebugMessage(1, 3, FColor::Purple, FString::Printf(TEXT("Tick")));
-		if (Sink->IsOn())
+		if (Sink->bIsOn)
 		{
 			HasWater = true;
 		}
 	}
 	else if (AStove* Stove = Cast<AStove>(OtherActor))
 	{
-		if (Stove->GetIsOn())
+		if (Stove->bIsOn)
 		{
 			HasFire = true;
 		}
-		
 	}
 }
 
@@ -112,39 +90,23 @@ void ACookingPot::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class 
 	}
 }
 
-bool ACookingPot::HasAnyIngridents()
+bool ACookingPot::HasAnyIngredients() const
 {
-	if (HasWater || HasSalt || HasPasta)
-	{
-		return true;
-	}
-
-	return false;
+	return (HasWater || HasSalt || HasPasta);
 }
 
-bool ACookingPot::IsTippedOver()
+bool ACookingPot::IsTippedOver() const
 {
-	float MaxTilt = 80.f;
-	float Roll = GetActorRotation().Roll;
-	float Pitch = GetActorRotation().Pitch;
+	const float MaxTilt = 80.f;
+	const float Roll = GetActorRotation().Roll;
+	const float Pitch = GetActorRotation().Pitch;
 
-
-	if (Roll > MaxTilt || Roll < -MaxTilt)
-	{
-		return true;
-	}
-	else if (Pitch > MaxTilt || Pitch < -MaxTilt)
-	{
-		return true;
-	}
-
-	return false;
+	return (FMath::Abs(Roll) > MaxTilt || FMath::Abs(Pitch) > MaxTilt);
 }
 
-// Need to refactor this into separate functions.
 void ACookingPot::OnTipOver()
 {
-	if (HasAnyIngridents())
+	if (HasAnyIngredients())
 	{
 		FVector Scale = FVector::OneVector;
 		FVector Location = IngredientSpawn->GetComponentLocation();
@@ -153,52 +115,35 @@ void ACookingPot::OnTipOver()
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.bNoFail = true;
 
-		if (HasPasta)
+		if (HasPasta && PastaClass)
 		{
-			if (PastaClass)
-			{
-				Pasta = GetWorld()->SpawnActor<AIngredient>(PastaClass, SpawnTransform, SpawnParams);
-				HasPasta = false;
-			}
+			Pasta = GetWorld()->SpawnActor<AIngredient>(PastaClass, SpawnTransform, SpawnParams);
+			HasPasta = false;
 		}
-		if (HasSalt)
+
+		if (HasSalt && SaltClass)
 		{
-			if (SaltClass)
-			{
-				Salt = GetWorld()->SpawnActor<AIngredient>(SaltClass, SpawnTransform, SpawnParams);
-				HasSalt = false;
-			}
+			Salt = GetWorld()->SpawnActor<AIngredient>(SaltClass, SpawnTransform, SpawnParams);
+			HasSalt = false;
 		}
-		// Need to add a water spill VFX to, but I don't thing there will be a mesh attached to this. 
 	}
 }
 
 void ACookingPot::PlaySound()
 {
-	if (HasWater && HasSalt && HasPasta && !HasPlayedSound)
+	if (HasWater && HasSalt && HasPasta && !HasPlayedSound && FireSound)
 	{
 		HasPlayedSound = true;
-		if(FireSound)
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)FireSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), FireSound, GetActorLocation());
 	}
 }
 
 void ACookingPot::SetupRefs()
 {
-	if (auto Player = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
-		Character = Player;
+	Character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
-bool ACookingPot::HasAllIngrediants()
+bool ACookingPot::HasAllIngredients() const
 {
-	if (HasWater && HasSalt && HasPasta && HasFire)
-	{
-		//GEngine->AddOnScreenDebugMessage(1, 3, FColor::Purple, FString::Printf(TEXT("Has All Ingredients")));
-		return true;
-	}
-
-	return false;
+	return (HasWater && HasSalt && HasPasta && HasFire);
 }
-
-
-

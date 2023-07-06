@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ron/World/Inspectable.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PawnMovementComponent.h"
@@ -20,7 +17,6 @@ AInspectable::AInspectable()
 	LerpSpeed = 3.f;
 	TimePassed = 0.f;
 	RotationTime = 0.f;
-	// The lower the number, the faster it moves. Down rotation needs to be slow so the down location can finish before the rotaion;
 	UpRotationSpeed = .5f;
 	DownRotationSpeed = 5.f;
 
@@ -63,7 +59,6 @@ void AInspectable::StartInspection(float DeltaTime)
 
 	CurrentRoll = StaticMesh->GetRelativeRotation().Roll;
 
-	// Smooth Rotation
 	if (FMath::IsNearlyEqual(CurrentRoll, MaxDegree, 10.5f))
 	{
 		IsEndingInspection = false;
@@ -73,7 +68,6 @@ void AInspectable::StartInspection(float DeltaTime)
 	}
 	else if (IsStartingInspection && RotationTime < UpRotationSpeed)
 	{
-		// RInterpTo was having issues so we use lerp range.
 		SetActorRotation(FMath::LerpRange(OriginalRotation, FRotator(0, 0, MaxDegree), (RotationTime / UpRotationSpeed)));
 		RotationTime += DeltaTime;
 	}
@@ -86,7 +80,6 @@ void AInspectable::EndInspection(float DeltaTime)
 
 	CurrentRoll = StaticMesh->GetRelativeRotation().Roll;
 
-	// Smooth Rotation
 	if (FMath::IsNearlyEqual(CurrentRoll, 0, 1.2f))
 	{
 		IsStartingInspection = false;
@@ -96,7 +89,6 @@ void AInspectable::EndInspection(float DeltaTime)
 	}
 	else if (IsEndingInspection && RotationTime < DownRotationSpeed)
 	{
-		// RInterpTo was having issues so we use lerp range.
 		SetActorRotation(FMath::LerpRange(GetActorRotation(), OriginalRotation, (RotationTime / DownRotationSpeed)));
 		RotationTime += DeltaTime;
 	}
@@ -127,13 +119,12 @@ void AInspectable::MoveToPlayer(float DeltaTime)
 			if (IsStartingInspection)
 			{
 				Player->GetMovementComponent()->SetActive(false);
-				// Smoothly move to the players hold location.
+
 				if (TimePassed < LerpSpeed)
 				{
 					SetActorLocation(FMath::Lerp(OrigialLocation, Player->GetHoldLocation(), (TimePassed / LerpSpeed)));
 					TimePassed += DeltaTime;
 				}
-				//TimePassed = 0.f;
 			}
 		}
 	}
@@ -145,16 +136,13 @@ void AInspectable::MoveToOriginalLocation(float DeltaTime)
 	{
 		if (ARonController* Controller = Cast<ARonController>(Player->GetController()))
 		{
-				Player->GetMovementComponent()->SetActive(true);
-				// Smoothly move to the original location.
-				if (TimePassed < LerpSpeed)
-				{
-					SetActorLocation(FMath::Lerp(Player->GetHoldLocation(), OrigialLocation, (TimePassed / LerpSpeed)));
-					TimePassed += DeltaTime;
-				}
-				//TimePassed = 0.f;
+			Player->GetMovementComponent()->SetActive(true);
+
+			if (TimePassed < LerpSpeed)
+			{
+				SetActorLocation(FMath::Lerp(Player->GetHoldLocation(), OrigialLocation, (TimePassed / LerpSpeed)));
+				TimePassed += DeltaTime;
+			}
 		}
 	}
 }
-
-

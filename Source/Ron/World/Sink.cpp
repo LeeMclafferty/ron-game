@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ron/World/Sink.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -8,51 +5,49 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
-
 ASink::ASink()
 {
-	WaterPath = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Water Path"));
-	WaterPath->SetupAttachment(RootComponent);
+    WaterPath = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Water Path"));
+    WaterPath->SetupAttachment(RootComponent);
 
-	HandleTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Handle Trigger"));
-	HandleTrigger->SetupAttachment(RootComponent);
+    HandleTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Handle Trigger"));
+    HandleTrigger->SetupAttachment(RootComponent);
 
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = StaticMesh;
+    StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+    RootComponent = StaticMesh;
 
-	WaterMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Water"));
-	WaterMesh->SetupAttachment(RootComponent);
-	WaterMesh->SetHiddenInGame(true);
-	WaterMesh->SetCollisionProfileName("NoCollision");
+    WaterMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Water"));
+    WaterMesh->SetupAttachment(RootComponent);
+    WaterMesh->SetHiddenInGame(true);
+    WaterMesh->SetCollisionProfileName("NoCollision");
 }
 
 void ASink::Interact()
 {
-	// TODO: Add Water VFX and sound.
-	if (!TurnedOn)
-	{
-		TurnedOn = true;
-		WaterMesh->SetHiddenInGame(false);
-		PlayWaterSound((USoundBase*)RunningWaterSFX);
-	}
-	else
-	{
-		TurnedOn = false;
-		WaterMesh->SetHiddenInGame(true);
-		RunningWaterSFX->VolumeMultiplier = 0;
-	}
+    // TODO: Add Water VFX and sound.
+    if (!TurnedOn)
+    {
+        TurnedOn = true;
+        WaterMesh->SetHiddenInGame(false);
+        PlayWaterSound(RunningWaterSFX);
+    }
+    else
+    {
+        TurnedOn = false;
+        WaterMesh->SetHiddenInGame(true);
+        RunningWaterSFX->VolumeMultiplier = 0.f;
+    }
 }
 
 void ASink::Tick(float DeltaSeconds)
 {
-
 }
 
 void ASink::PlayWaterSound(USoundBase* SoundtoPlay)
 {
-	if (!SoundtoPlay)
-		return;
+    if (!SoundtoPlay)
+        return;
 
-	RunningWaterSFX->VolumeMultiplier = 1;
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundtoPlay, GetActorLocation());
+    RunningWaterSFX->VolumeMultiplier = 1.f;
+    UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundtoPlay, GetActorLocation());
 }

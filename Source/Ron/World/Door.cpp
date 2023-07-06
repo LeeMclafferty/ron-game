@@ -1,8 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Ron/World/Door.h"
 #include "Components/StaticMeshComponent.h"
-#include "Math/UnrealMathUtility.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -12,13 +9,13 @@ ADoor::ADoor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
 
-	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Door Mesh"));
+	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
 	DoorMesh->SetupAttachment(RootComponent);
 
-	UnlockTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Unlock Trigger"));
+	UnlockTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("UnlockTrigger"));
 	UnlockTrigger->SetupAttachment(DoorMesh);
 
 	IsUnlocked = true;
@@ -70,10 +67,9 @@ void ADoor::OpenDoor(float DeltaTime)
 		IsClosing = false;
 		IsOpening = false;
 	}
-	else if (IsOpening) 
+	else if (IsOpening)
 	{
-		FRotator NewRotation = FRotator(0.f, AddRotation, 0.0f);
-		DoorMesh->AddRelativeRotation(FQuat(NewRotation), false);
+		DoorMesh->AddRelativeRotation(FRotator(0.f, AddRotation, 0.0f), false);
 	}
 }
 
@@ -87,7 +83,7 @@ void ADoor::CloseDoor(float DeltaTime)
 	}
 	else
 	{
-		AddRotation = DeltaTime* 80;
+		AddRotation = DeltaTime * 80;
 	}
 
 	if (FMath::IsNearlyEqual(DoorCurrentRotation, 0.f, 1.5f))
@@ -97,8 +93,7 @@ void ADoor::CloseDoor(float DeltaTime)
 	}
 	else if (IsClosing)
 	{
-		FRotator NewRotation = FRotator(0.f, AddRotation, 0.f);
-		DoorMesh->AddRelativeRotation(FQuat(NewRotation), false);
+		DoorMesh->AddRelativeRotation(FRotator(0.f, AddRotation, 0.f), false);
 	}
 }
 
@@ -133,13 +128,10 @@ void ADoor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherAct
 	{
 		if (DoorKey->GetTriggerBox())
 		{
-			if (!IsUnlocked && UnlockKey)
+			if (!IsUnlocked && UnlockKey == DoorKey)
 			{
-				if (UnlockKey == DoorKey)
-				{
-					IsUnlocked = true;
-					UnlockKey->DisableKey();
-				}
+				IsUnlocked = true;
+				UnlockKey->DisableKey();
 			}
 		}
 	}
@@ -152,9 +144,8 @@ void ADoor::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor
 
 void ADoor::PlaySound(USoundBase* SoundToPlay)
 {
-	if (!SoundToPlay)
-		return;
-
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToPlay, GetActorLocation());
+	if (SoundToPlay)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToPlay, GetActorLocation());
+	}
 }
-

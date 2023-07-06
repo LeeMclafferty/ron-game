@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ron/Items/LootableInventoryWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,51 +11,50 @@
 
 bool ULootableInventoryWidget::Initialize()
 {
-	bool Success = Super::Initialize();
+    bool Success = Super::Initialize();
 
-	if (Success)
-	{
-		InitWidget();
-		SetupScrollBox();
-	}
+    if (Success)
+    {
+        InitWidget();
+        SetupScrollBox();
+    }
 
-	return Success;
+    return Success;
 }
 
-void ULootableInventoryWidget::CloseWiget()
+void ULootableInventoryWidget::CloseWidget()
 {
-	static bool HasBeenClosed = false;
-	if (ARonController* PlayerContoller = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
-	{
-		PlayerContoller->EnableGameplayInput();
-		RemoveFromParent();
-		if (ACharacterBase* PlayerCharacter = Cast<ACharacterBase>(PlayerContoller->GetCharacter()))
-		{
-			
-			if (AFridgeLootable* Lootable = Cast<AFridgeLootable>(PlayerCharacter->GetActorBeingLooted()))
-			{
-				if (SoundToPlay && !HasBeenClosed)
-				{
-					HasBeenClosed = true;
-					UGameplayStatics::PlaySoundAtLocation(GetWorld(), (USoundBase*)SoundToPlay, PlayerCharacter->GetActorLocation());
-				}
-			}
-			PlayerCharacter->SetActorBeingLooted(nullptr);
-		}
-	}
+    static bool HasBeenClosed = false;
+    ARonController* PlayerController = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    if (PlayerController)
+    {
+        PlayerController->EnableGameplayInput();
+        RemoveFromParent();
+        ACharacterBase* PlayerCharacter = Cast<ACharacterBase>(PlayerController->GetCharacter());
+        if (PlayerCharacter)
+        {
+            if (AFridgeLootable* Lootable = Cast<AFridgeLootable>(PlayerCharacter->GetActorBeingLooted()))
+            {
+                if (SoundToPlay && !HasBeenClosed)
+                {
+                    HasBeenClosed = true;
+                    UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToPlay, PlayerCharacter->GetActorLocation());
+                }
+            }
+            PlayerCharacter->SetActorBeingLooted(nullptr);
+        }
+    }
 }
 
 void ULootableInventoryWidget::InitWidget()
 {
-	SetupCloseButton();
+    SetupCloseButton();
 }
 
 void ULootableInventoryWidget::SetupCloseButton()
 {
-	if (CloseButton)
-	{
-		CloseButton->OnPressed.AddDynamic(this, &ULootableInventoryWidget::CloseWiget);
-	}
+    if (CloseButton)
+    {
+        CloseButton->OnPressed.AddDynamic(this, &ULootableInventoryWidget::CloseWidget);
+    }
 }
-
-

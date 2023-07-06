@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Ron/World/Lootable.h"
 #include "Blueprint/UserWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -22,35 +19,31 @@ ALootable::ALootable()
 void ALootable::BeginPlay()
 {
 	Super::BeginPlay();
-
-//	if(AllItemData[0])
-	//	ItemOne = AllItemData[0];
 }
 
 void ALootable::Interact()
 {
-	// When the player interacts with the Lootable, UI should display with what is inside.
 	Super::Interact();
-
 	LoadInventoryWidget();
 }
 
 void ALootable::Tick(float DeltaSeconds)
 {
-	//GEngine->AddOnScreenDebugMessage(1, 1, FColor::Purple, FString::Printf(TEXT("ItemData[0]: %ul"), AllItemData[0]));
+
 }
 
 void ALootable::LoadInventoryWidget()
 {
-	if (ARonController* PlayerContoller = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	if (ARonController* PlayerController = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
 	{
 		if (WidgetClass)
 		{
-			if (ACharacterBase* PlayerCharacter = Cast<ACharacterBase>(PlayerContoller->GetCharacter()))
+			if (ACharacterBase* PlayerCharacter = Cast<ACharacterBase>(PlayerController->GetCharacter()))
 			{
 				PlayerCharacter->SetActorBeingLooted(this);
 			}
-			InventoryWidget = CreateWidget<ULootableInventoryWidget>(PlayerContoller, WidgetClass);
+
+			InventoryWidget = CreateWidget<ULootableInventoryWidget>(PlayerController, WidgetClass);
 			InventoryWidget->AddToViewport();
 			SetUIPlayerInput();
 		}
@@ -59,29 +52,28 @@ void ALootable::LoadInventoryWidget()
 
 void ALootable::SetUIPlayerInput()
 {
-	if (ARonController* PlayerContoller = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+	if (ARonController* PlayerController = Cast<ARonController>(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
 	{
-		PlayerContoller->EnableUIInput();
+		PlayerController->EnableUIInput();
 	}
 }
 
-void ALootable::RemoveByIndex(int32 index)
+void ALootable::RemoveByIndex(int32 Index)
 {
-	AllItemData.RemoveAt(index);
+	AllItemData.RemoveAt(Index);
 }
 
-void ALootable::SpawnItem(TSubclassOf<class AInteractable>ItemClass)
+void ALootable::SpawnItem(TSubclassOf<class AInteractable> ItemClass)
 {
-	FVector Scale = FVector::OneVector;
-	FVector Location = ItemSpawnLocation->GetComponentLocation();
-	FRotator Rotation = GetActorRotation();
-	FTransform SpawnTransform = FTransform(Rotation, Location, Scale);
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.bNoFail = true;
-
 	if (ItemClass)
 	{
+		FVector Scale = FVector::OneVector;
+		FVector Location = ItemSpawnLocation->GetComponentLocation();
+		FRotator Rotation = GetActorRotation();
+		FTransform SpawnTransform(Rotation, Location, Scale);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bNoFail = true;
+
 		GetWorld()->SpawnActor<AInteractable>(ItemClass, SpawnTransform, SpawnParams);
 	}
 }
-
